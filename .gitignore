@@ -98,3 +98,4 @@ local.properties
 *.xml
 bwapi-data/BWTA2/5183d669f47d2c8b67c0bde645e0942f5d8c71d8.bwta
 *.bwta
+*.log

@@ -9,44 +9,53 @@ import java.util.ArrayList;
  * Created by dhawo on 07/04/2017.
  */
 public class IncomeManager extends Manager {
+    private static IncomeManager instance;
     private Unit commandCenter = null;
     private ArrayList<Unit> idleSCVs = new ArrayList<>();
 
-    public IncomeManager(Game game, Player self) {
+    public static void init(Game game, Player player) {
+        instance = new IncomeManager(game, player);
+    }
+
+    private IncomeManager(Game game, Player self) {
         super(game, self);
+    }
+
+    public static IncomeManager getInstance() {
+        return instance;
     }
 
     @Override
     public void processMessage(String message) {
-        switch (message){
+        switch (message) {
             case "free scv":
                 freeSCV();
                 break;
         }
     }
 
-    public void getCommandCenter(){
+    public void getCommandCenter() {
         for (Unit myUnit : self.getUnits()) {
-            if(myUnit.getType() == UnitType.Terran_Command_Center){
+            if (myUnit.getType() == UnitType.Terran_Command_Center) {
                 commandCenter = myUnit;
                 break;
             }
         }
     }
 
-    public void buildSCV(){
-        if(self.minerals() >= 50 && !commandCenter.isTraining()){
+    public void buildSCV() {
+        if (self.minerals() >= 50 && !commandCenter.isTraining()) {
             commandCenter.train(UnitType.Terran_SCV);
         }
     }
 
-    public void buildSupply(){
+    public void buildSupply() {
         //Build supply
         //iterate over units to find a worker
         for (Unit myUnit : self.getUnits()) {
             if (myUnit.getType() == UnitType.Terran_SCV) {
                 //get a nice place to build a supply depot
-                TilePosition buildTile = util.Utils.getBuildTile(game,myUnit, UnitType.Terran_Supply_Depot, self.getStartLocation());
+                TilePosition buildTile = util.Utils.getBuildTile(game, myUnit, UnitType.Terran_Supply_Depot, self.getStartLocation());
                 //and, if found, send the worker to build it (and leave others alone - break;)
                 if (buildTile != null) {
                     myUnit.build(UnitType.Terran_Supply_Depot, buildTile);
@@ -56,17 +65,15 @@ public class IncomeManager extends Manager {
         }
     }
 
-    public void freeSCV(){
-        for (Unit myUnit : self.getUnits()) {
-            if (myUnit.getType() == UnitType.Terran_SCV) {
-                //get a nice place to build a supply depot
-                idleSCVs.add(myUnit);
-                myUnit.stop();
-            }
-        }
+    public void freeSCV() {
+        self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_SCV).forEach(u -> {
+                    idleSCVs.add(u);
+                    u.stop();
+                }
+        );
     }
 
-    public void sendIdleWorkersToWork(){
+    public void sendIdleWorkersToWork() {
         for (Unit myUnit : self.getUnits()) {
             //if it's a worker and it's idle, send it to the closest mineral patch
             if (idleSCVs.contains(myUnit) && myUnit.getType().isWorker() && myUnit.isIdle()) {
@@ -89,13 +96,17 @@ public class IncomeManager extends Manager {
         }
     }
 
+    public ArrayList<Unit> getIdleSCVs() {
+        return idleSCVs;
+    }
+
     @Override
     public void run() {
         getCommandCenter();
-        while (true){
-            if(self.supplyTotal() - self.supplyUsed() > 2){
+        while (true) {
+            if (self.supplyTotal() - self.supplyUsed() > 2) {
                 buildSCV();
-            }else if(self.minerals()>=100){
+            } else if (self.minerals() >= 100) {
                 buildSupply();
             }
             sendIdleWorkersToWork();

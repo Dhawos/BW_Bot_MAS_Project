@@ -2,6 +2,7 @@ import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
 import manager.IncomeManager;
+import manager.ReconManager;
 import manager.StrategyManager;
 
 public class TestBot1 extends DefaultBWListener {
@@ -11,9 +12,6 @@ public class TestBot1 extends DefaultBWListener {
     private Game game;
 
     private Player self;
-
-    private StrategyManager strategyManager;
-    private IncomeManager incomeManager;
 
     public void run() {
         mirror.getModule().setEventListener(this);
@@ -47,12 +45,15 @@ public class TestBot1 extends DefaultBWListener {
         }
         game.setLocalSpeed(30);
         //Setting up and starting managers
-        strategyManager = new StrategyManager(game,self);
-        incomeManager = new IncomeManager(game,self);
-        Thread SMThread = new Thread(strategyManager);
+        StrategyManager.init(game,self);
+        IncomeManager.init(game,self);
+        ReconManager.init(game, self);
+        Thread SMThread = new Thread(StrategyManager.getInstance());
         SMThread.start();
-        Thread IMThread = new Thread(incomeManager);
+        Thread IMThread = new Thread(IncomeManager.getInstance());
         IMThread.start();
+        Thread RMThreahd = new Thread(ReconManager.getInstance());
+        RMThreahd.start();
     }
 
     @Override
