@@ -16,7 +16,11 @@ public abstract class Manager implements Runnable {
     }
 
     public abstract void processMessage(String message);
+
+    public abstract void onFrame();
+
     public void ask(Manager other,String message){
+        game.drawTextScreen(10, 10, getClass().getName() + "asked " + other.getClass().getName() + " : " + message);
         other.processMessage(message);
     };
 }

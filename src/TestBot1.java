@@ -2,6 +2,7 @@ import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
 import manager.IncomeManager;
+import manager.ProductionManager;
 import manager.ReconManager;
 import manager.StrategyManager;
 
@@ -48,24 +49,37 @@ public class TestBot1 extends DefaultBWListener {
         StrategyManager.init(game,self);
         IncomeManager.init(game,self);
         ReconManager.init(game, self);
+        ProductionManager.init(game,self);
         Thread SMThread = new Thread(StrategyManager.getInstance());
-        SMThread.start();
+        //SMThread.start();
         Thread IMThread = new Thread(IncomeManager.getInstance());
-        IMThread.start();
-        Thread RMThreahd = new Thread(ReconManager.getInstance());
-        RMThreahd.start();
+        //IMThread.start();
+        Thread RMThread = new Thread(ReconManager.getInstance());
+        //RMThread.start();
+        Thread PMThread = new Thread(ProductionManager.getInstance());
+        //PMThread.start();
     }
 
     @Override
     public void onFrame() {
         //game.setTextSize(10);
+        /*
         game.drawTextScreen(10, 10, "Playing as " + self.getName() + " - " + self.getRace());
         StringBuilder units = new StringBuilder("My units:\n");
         for (Unit myUnit : self.getUnits()) {
             units.append(myUnit.getType()).append(" ").append(myUnit.getTilePosition()).append("\n");
-        }
+        }*/
+        IncomeManager.getInstance().onFrame();
+        ProductionManager.getInstance().onFrame();
+        /*
         //draw my units on screen
-        game.drawTextScreen(10, 25, units.toString());
+        game.drawTextScreen(10, 25, units.toString());*/
+    }
+
+    @Override
+    public void onUnitComplete(Unit unit) {
+        super.onUnitComplete(unit);
+        ProductionManager.getInstance().onUnitComplete(unit);
     }
 
     public static void main(String[] args) {

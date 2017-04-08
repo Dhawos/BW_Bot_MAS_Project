@@ -46,17 +46,22 @@ public class ReconManager extends Manager {
                 UnitAgent scout = pickScoutingUnit();
                 scout.setJob(UnitJob.SCOUT);
                 scout.act();
-                IncomeManager.getInstance().sendIdleWorkersToWork();
+                //IncomeManager.getInstance().sendIdleWorkersToWork();
                 currentlyScouting = true;
             }
         }
 
     }
 
+    @Override
+    public void onFrame() {
+
+    }
+
     private UnitAgent pickScoutingUnit() {
         ask(IncomeManager.getInstance(), "free scv");
-        Unit scout = IncomeManager.getInstance().getIdleSCVs().stream().findAny().get();
-        IncomeManager.getInstance().getIdleSCVs().remove(scout);
+        Unit scout = IncomeManager.getInstance().getFreeSCVs().stream().findAny().get();
+        //IncomeManager.getInstance().getIdleSCVs().remove(scout);
         return new GroundAgent(scout);
     }
 

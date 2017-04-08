@@ -31,6 +31,11 @@ public class StrategyManager extends Manager {
         initiateBO();
     }
 
+    @Override
+    public void onFrame() {
+
+    }
+
     public void initiateBO(){
     }
 }
