@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 public class ProductionManager extends Manager {
     private static ProductionManager instance;
     private class ProductionBuildingsRatio{
-        private int nbBarracksGoal = 5;
+        private int nbBarracksGoal = 1;
         private int nbFactoriesGoal = 0;
         private int nbStartportGoal = 0;
         private int nbBarracksBuilt = 0;
@@ -34,13 +34,10 @@ public class ProductionManager extends Manager {
         return instance;
     }
 
-    public Unit getCommandCenter() {
-        return commandCenter;
-    }
-
     private ProductionManager(Game game, Player self) {
         super(game,self);
         queue = new LinkedList<>();
+        inProductionQueue = new LinkedList<>();
     }
 
     @Override
@@ -48,6 +45,9 @@ public class ProductionManager extends Manager {
 
     }
 
+    public Unit getCommandCenter() {
+        return commandCenter;
+    }
 
     public void retrieveCommandCenter() {
         commandCenter = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Command_Center).findFirst().get();
@@ -55,55 +55,43 @@ public class ProductionManager extends Manager {
 
     public void buildSCV() {
         if (self.minerals() >= 50 && !commandCenter.isTraining()) {
-            commandCenter.train(UnitType.Terran_SCV);
+            if(commandCenter.train(UnitType.Terran_SCV)){
+                inProductionQueue.add(UnitType.Terran_SCV);
+            }
         }
 
     }
 
     public void buildSupply() {
-        /*
-        //Build supply
-        //iterate over units to find a worker
-        for (Unit myUnit : self.getUnits()) {
-            if (myUnit.getType() == UnitType.Terran_SCV) {
-                //get a nice place to build a supply depot
-                TilePosition buildTile = util.Utils.getBuildTile(game, myUnit, UnitType.Terran_Supply_Depot, self.getStartLocation());
-                //and, if found, send the worker to build it (and leave others alone - break;)
-                if (buildTile != null) {
-                    myUnit.build(UnitType.Terran_Supply_Depot, buildTile);
-                    break;
-                }
-            }
-        }
-        */
         Unit builder = null;
-        ask(IncomeManager.getInstance(),"free scv");
         try{
-            builder = IncomeManager.getInstance().getFreeSCVs().stream().findAny().get();
+            builder = IncomeManager.getInstance().getFreeSCVs().stream().filter(u -> u.isIdle()).findAny().get();
         }catch(NoSuchElementException ex){
-            System.out.println("No builder available");
+            ask(IncomeManager.getInstance(),"free scv");
+            builder = IncomeManager.getInstance().getFreeSCVs().stream().filter(u -> u.isIdle()).findAny().get();
 
         }
         TilePosition buildTile = util.Utils.getBuildTile(game, builder, UnitType.Terran_Supply_Depot, self.getStartLocation());
         if (buildTile != null) {
-            builder.build(UnitType.Terran_Barracks, buildTile);
+            if(builder.build(UnitType.Terran_Supply_Depot, buildTile)){
+                inProductionQueue.add(UnitType.Terran_Supply_Depot);
+            }
         }
     }
 
     public void buildBarrack() {
-        //Build supply
-        //iterate over units to find a worker
         Unit builder = null;
-        ask(IncomeManager.getInstance(),"free scv");
         try{
-            builder = IncomeManager.getInstance().getFreeSCVs().stream().findAny().get();
+            builder = IncomeManager.getInstance().getFreeSCVs().stream().filter(u -> u.isIdle()).findAny().get();
         }catch(NoSuchElementException ex){
-            System.out.println("No builder available");
-
+            ask(IncomeManager.getInstance(),"free scv");
+            builder = IncomeManager.getInstance().getFreeSCVs().stream().filter(u -> u.isIdle()).findAny().get();
         }
         TilePosition buildTile = util.Utils.getBuildTile(game, builder, UnitType.Terran_Barracks, self.getStartLocation());
         if (buildTile != null) {
-            builder.build(UnitType.Terran_Barracks, buildTile);
+            if(builder.build(UnitType.Terran_Barracks, buildTile)){
+                inProductionQueue.add(UnitType.Terran_Barracks);
+            }
         }
     }
 
@@ -118,15 +106,10 @@ public class ProductionManager extends Manager {
     }
 
     public void startBuildingsInQueue(){
-        LinkedList<UnitType> copy_list = new LinkedList<>(queue);
-        for(UnitType unitType : copy_list){
-            if(unitType.mineralPrice() <= self.minerals() && unitType.gasPrice() <= self.gas() && unitType.supplyRequired() <= (self.supplyTotal() - self.supplyUsed())){
-                build(unitType);
-                queue.remove(unitType);
-                inProductionQueue.add(unitType);
-            }else{
-                break;
-            }
+        UnitType unitType = queue.getFirst();
+        if(unitType.mineralPrice() <= self.minerals() && unitType.gasPrice() <= self.gas() && unitType.supplyRequired() <= (self.supplyTotal() - self.supplyUsed())){
+            build(unitType);
+            queue.remove(unitType);
         }
     }
 
@@ -147,23 +130,16 @@ public class ProductionManager extends Manager {
 
     @Override
     public void onFrame() {
-        /*
-        if (self.supplyTotal() - self.supplyUsed() > 2) {
-            buildSCV();
-            if(self.minerals() > 150 && buildingsRatio.nbBarracksBuilt < buildingsRatio.nbBarracksGoal){
-                buildBarrack();
-            }
-        } else if (self.minerals() >= 100) {
-            buildSupply();
-        }
-        */
-        if(!commandCenter.isTraining()){
+        getCommandCenter();
+        long nbBarracksInProd = inProductionQueue.stream().filter(u -> u == UnitType.Terran_Barracks).count();
+        long nbBarracksinQueue = queue.stream().filter(u -> u == UnitType.Terran_Barracks).count();
+        if(!commandCenter.isTraining() && (!instance.queue.contains(UnitType.Terran_SCV) && !instance.inProductionQueue.contains(UnitType.Terran_SCV))){
             instance.queue.add(UnitType.Terran_SCV);
         }
-        if(self.supplyTotal() - self.supplyUsed() <= 2 && (!instance.queue.contains(UnitType.Terran_Supply_Depot) || !instance.inProductionQueue.contains(UnitType.Terran_Supply_Depot))){
+        else if(self.supplyTotal() - self.supplyUsed() <= 2 && (!instance.queue.contains(UnitType.Terran_Supply_Depot) && !instance.inProductionQueue.contains(UnitType.Terran_Supply_Depot))){
             instance.queue.add(UnitType.Terran_Supply_Depot);
         }
-        if(self.minerals() > 150 && buildingsRatio.nbBarracksBuilt < buildingsRatio.nbBarracksGoal){
+        else if(self.minerals() > 150 && buildingsRatio.nbBarracksBuilt + nbBarracksInProd + nbBarracksinQueue < buildingsRatio.nbBarracksGoal){
             instance.queue.add(UnitType.Terran_Barracks);
         }
         startBuildingsInQueue();
@@ -172,11 +148,16 @@ public class ProductionManager extends Manager {
 
     public void onUnitComplete(Unit unit) {
         UnitType type = unit.getType();
+        if(type == UnitType.Terran_Barracks){
+            buildingsRatio.nbBarracksBuilt++;
+            buildingsRatio.nbBarracksGoal++;
+        }
         inProductionQueue.remove(type);
     }
 
     @Override
     public void run() {
+        getCommandCenter();
         while (true) {
             if (self.supplyTotal() - self.supplyUsed() > 2) {
                 buildSCV();
