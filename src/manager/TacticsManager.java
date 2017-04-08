@@ -39,7 +39,7 @@ public class TacticsManager extends Manager {
     public void attacks() {
         for (Unit myUnit : self.getUnits()) {
             if (myUnit.getType() == UnitType.Terran_Marine) {
-                myUnit.attack(ReconManager.getInstance().getScoutingPosition());
+                myUnit.attack(ReconManager.getInstance().getEnemyPositon());
             }
         }
     }

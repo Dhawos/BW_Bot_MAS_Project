@@ -5,14 +5,13 @@ import bwapi.Unit;
 import manager.ReconManager;
 
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Created by Thoma on 07/04/2017.
  */
 public abstract class UnitAgent {
     private Unit unit;
-    private Queue<Position> path;
+    private Position lastPosition;
     private UnitJob job = UnitJob.IDLE;
 
     public UnitAgent(Unit unit) {
@@ -21,6 +20,9 @@ public abstract class UnitAgent {
 
     public abstract void findPath(Position target);
 
+    public Unit getUnit() {
+        return unit;
+    }
 
     public void setJob(UnitJob job) {
         this.job = job;
@@ -35,9 +37,24 @@ public abstract class UnitAgent {
 
     private void scout(){
         List<Position> targetPositions = ReconManager.getInstance().getScoutingPosition();
-        Position returnPostion = unit.getPosition();
+        lastPosition = unit.getPosition();
         targetPositions.stream().forEach(p -> unit.move(p, true));
         //queue move back to base
-        unit.move(returnPostion, true);
+        unit.move(lastPosition, true);
+    }
+
+    public boolean isJobDone(){
+        switch (job){
+            case SCOUT:
+                if(unit.getPosition().equals(lastPosition)){
+                    return true;
+                }else {
+                    return false;
+                }
+            case IDLE:
+                return true;
+            default:
+                return true;
+        }
     }
 }

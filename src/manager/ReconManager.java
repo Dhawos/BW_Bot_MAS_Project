@@ -25,6 +25,8 @@ public class ReconManager extends Manager {
     private boolean currentlyScouting = false;
     private List<BaseLocation> bases;
     private Position enemyPositon;
+    private int lastFrameScouting = Integer.MAX_VALUE;
+    private UnitAgent scout;
     public static ReconManager getInstance() {
         return instance;
     }
@@ -35,7 +37,6 @@ public class ReconManager extends Manager {
 
     public static void init(Game game, Player player) {
         instance = new ReconManager(game, player);
-        List<BaseLocation> test = BWTA.getBaseLocations().stream().filter(b -> b.isStartLocation()).collect(Collectors.toList());
         instance.bases = BWTA.getBaseLocations();
     }
 
@@ -50,19 +51,22 @@ public class ReconManager extends Manager {
 
     @Override
     public void onFrame() {
-        if (!currentlyScouting) {
-            UnitAgent scout = pickScoutingUnit();
+        //go scouting every 2 minutes
+        if (lastFrameScouting - game.getFrameCount() > 3600) {
+            scout = pickScoutingUnit();
             scout.setJob(UnitJob.SCOUT);
             scout.act();
-            //IncomeManager.getInstance().sendIdleWorkersToWork();
-            currentlyScouting = true;
+            lastFrameScouting = game.getFrameCount();
+        } else if (scout != null && scout.isJobDone()){
+            scout = null;
+
+            IncomeManager.getInstance().sendIdleWorkersToWork();
         }
     }
 
     private UnitAgent pickScoutingUnit() {
         ask(IncomeManager.getInstance(), "free scv");
         Unit scout = IncomeManager.getInstance().getFreeSCVs().stream().findAny().get();
-        //IncomeManager.getInstance().getIdleSCVs().remove(scout);
         return new GroundAgent(scout);
     }
 
@@ -75,5 +79,9 @@ public class ReconManager extends Manager {
         }
         return new ArrayList<Position>(){{add(enemyPositon);}};
 
+    }
+
+    public Position getEnemyPositon() {
+        return enemyPositon;
     }
 }
