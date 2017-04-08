@@ -27,10 +27,15 @@ public class ProductionManager extends Manager {
     public static void init(Game game, Player player) {
         instance = new ProductionManager(game, player);
         instance.queue.add(UnitType.Terran_SCV);
+        instance.retrieveCommandCenter();
     }
 
     public static ProductionManager getInstance() {
         return instance;
+    }
+
+    public Unit getCommandCenter() {
+        return commandCenter;
     }
 
     private ProductionManager(Game game, Player self) {
@@ -44,13 +49,8 @@ public class ProductionManager extends Manager {
     }
 
 
-    public void getCommandCenter() {
-        for (Unit myUnit : self.getUnits()) {
-            if (myUnit.getType() == UnitType.Terran_Command_Center) {
-                commandCenter = myUnit;
-                break;
-            }
-        }
+    public void retrieveCommandCenter() {
+        commandCenter = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Command_Center).findFirst().get();
     }
 
     public void buildSCV() {
@@ -147,7 +147,6 @@ public class ProductionManager extends Manager {
 
     @Override
     public void onFrame() {
-        getCommandCenter();
         /*
         if (self.supplyTotal() - self.supplyUsed() > 2) {
             buildSCV();
@@ -178,7 +177,6 @@ public class ProductionManager extends Manager {
 
     @Override
     public void run() {
-        getCommandCenter();
         while (true) {
             if (self.supplyTotal() - self.supplyUsed() > 2) {
                 buildSCV();

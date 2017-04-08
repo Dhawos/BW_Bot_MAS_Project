@@ -4,6 +4,7 @@ import bwapi.Position;
 import bwapi.Unit;
 import manager.ReconManager;
 
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -33,10 +34,10 @@ public abstract class UnitAgent {
     }
 
     private void scout(){
-        Position targetPosition = ReconManager.getInstance().getScoutingPosition();
+        List<Position> targetPositions = ReconManager.getInstance().getScoutingPosition();
         Position returnPostion = unit.getPosition();
-        unit.move(targetPosition);
-
-        //unit.move(returnPostion);
+        targetPositions.stream().forEach(p -> unit.move(p, true));
+        //queue move back to base
+        unit.move(returnPostion, true);
     }
 }

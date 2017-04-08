@@ -48,8 +48,8 @@ public class TestBot1 extends DefaultBWListener {
         //Setting up and starting managers
         StrategyManager.init(game,self);
         IncomeManager.init(game,self);
-        ReconManager.init(game, self);
         ProductionManager.init(game,self);
+        ReconManager.init(game, self);
         Thread SMThread = new Thread(StrategyManager.getInstance());
         //SMThread.start();
         Thread IMThread = new Thread(IncomeManager.getInstance());
@@ -71,6 +71,7 @@ public class TestBot1 extends DefaultBWListener {
         }*/
         IncomeManager.getInstance().onFrame();
         ProductionManager.getInstance().onFrame();
+        ReconManager.getInstance().onFrame();
         /*
         //draw my units on screen
         game.drawTextScreen(10, 25, units.toString());*/
