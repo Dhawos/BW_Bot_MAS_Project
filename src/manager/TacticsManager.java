@@ -39,7 +39,8 @@ public class TacticsManager extends Manager {
     public void attacks() {
         for (Unit myUnit : self.getUnits()) {
             if (myUnit.getType() == UnitType.Terran_Marine) {
-                myUnit.attack(ReconManager.getInstance().getScoutingPosition());
+                //Need the implementation of getEnnemyPosition in ReconManager
+                //myUnit.attack(ReconManager.getInstance().getEnnemyPosition());
             }
         }
     }
