@@ -22,13 +22,16 @@ public class TacticsManager extends Manager {
 
     @Override
     public void processMessage(String message) {
+        switch(message) {
+            case "attacks":
+                attacks();
+                break;
+        }
+
     }
 
     @Override
     public void run(){
-        if (StrategyManager.getInstance().isAttackable()){
-            attacks();
-        }
     }
 
     @Override

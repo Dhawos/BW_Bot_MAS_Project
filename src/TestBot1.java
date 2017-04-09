@@ -1,10 +1,7 @@
 import bwapi.*;
 import bwta.BWTA;
 import bwta.BaseLocation;
-import manager.IncomeManager;
-import manager.ProductionManager;
-import manager.ReconManager;
-import manager.StrategyManager;
+import manager.*;
 
 public class TestBot1 extends DefaultBWListener {
 
@@ -47,6 +44,7 @@ public class TestBot1 extends DefaultBWListener {
         game.setLocalSpeed(7);
         //Setting up and starting managers
         StrategyManager.init(game,self);
+        TacticsManager.init(game,self);
         IncomeManager.init(game,self);
         ProductionManager.init(game,self);
         ReconManager.init(game, self);
@@ -58,6 +56,8 @@ public class TestBot1 extends DefaultBWListener {
         //RMThread.start();
         Thread PMThread = new Thread(ProductionManager.getInstance());
         //PMThread.start();
+        Thread TMThread = new Thread(TacticsManager.getInstance());
+        //TMThread.start();
     }
 
     @Override
@@ -72,6 +72,8 @@ public class TestBot1 extends DefaultBWListener {
         IncomeManager.getInstance().onFrame();
         ProductionManager.getInstance().onFrame();
         ReconManager.getInstance().onFrame();
+        StrategyManager.getInstance().onFrame();
+        TacticsManager.getInstance().onFrame();
         /*
         //draw my units on screen
         game.drawTextScreen(10, 25, units.toString());*/
@@ -87,6 +89,12 @@ public class TestBot1 extends DefaultBWListener {
     public void onUnitShow(Unit unit) {
         super.onUnitShow(unit);
         ReconManager.getInstance().onUnitShow(unit);
+    }
+
+    @Override
+    public void onUnitDiscover(Unit unit) {
+        super.onUnitDiscover(unit);
+        ProductionManager.getInstance().onUnitDiscover(unit);
     }
 
     public static void main(String[] args) {
