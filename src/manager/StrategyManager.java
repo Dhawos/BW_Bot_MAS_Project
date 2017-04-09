@@ -42,6 +42,6 @@ public class StrategyManager extends Manager {
 
     public void initiateBO(){
         ask(ProductionManager.getInstance(),"build 2 barracks");
-        ask(ProductionManager.getInstance(),"build 20 marines");
+        ask(ProductionManager.getInstance(),"build 10 marines");
     }
 }
