@@ -44,7 +44,7 @@ public class TestBot1 extends DefaultBWListener {
         	}
         	System.out.println();
         }
-        game.setLocalSpeed(30);
+        game.setLocalSpeed(7);
         //Setting up and starting managers
         StrategyManager.init(game,self);
         IncomeManager.init(game,self);
@@ -81,6 +81,12 @@ public class TestBot1 extends DefaultBWListener {
     public void onUnitComplete(Unit unit) {
         super.onUnitComplete(unit);
         ProductionManager.getInstance().onUnitComplete(unit);
+    }
+
+    @Override
+    public void onUnitShow(Unit unit) {
+        super.onUnitShow(unit);
+        ReconManager.getInstance().onUnitShow(unit);
     }
 
     public static void main(String[] args) {

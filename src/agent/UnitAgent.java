@@ -46,7 +46,7 @@ public abstract class UnitAgent {
     public boolean isJobDone(){
         switch (job){
             case SCOUT:
-                if(unit.getPosition().equals(lastPosition)){
+                if(unit.getPosition().equals(lastPosition) || !unit.exists()){
                     return true;
                 }else {
                     return false;
