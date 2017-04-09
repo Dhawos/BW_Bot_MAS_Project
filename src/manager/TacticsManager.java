@@ -22,13 +22,16 @@ public class TacticsManager extends Manager {
 
     @Override
     public void processMessage(String message) {
+        switch(message) {
+            case "attacks":
+                attacks();
+                break;
+        }
+
     }
 
     @Override
     public void run(){
-        if (StrategyManager.getInstance().isAttackable()){
-            attacks();
-        }
     }
 
     @Override
@@ -39,8 +42,7 @@ public class TacticsManager extends Manager {
     public void attacks() {
         for (Unit myUnit : self.getUnits()) {
             if (myUnit.getType() == UnitType.Terran_Marine) {
-                //Need the implementation of getEnnemyPosition in ReconManager
-                //myUnit.attack(ReconManager.getInstance().getEnnemyPosition());
+                myUnit.attack(ReconManager.getInstance().getEnemyPositon());
             }
         }
     }

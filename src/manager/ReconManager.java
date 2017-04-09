@@ -24,9 +24,14 @@ public class ReconManager extends Manager {
     private static ReconManager instance;
     private boolean currentlyScouting = false;
     private List<BaseLocation> bases;
+
     private Position enemyPositon;
     public static ReconManager getInstance() {
         return instance;
+    }
+
+    public Position getEnemyPositon() {
+        return enemyPositon;
     }
 
     private ReconManager(Game game, Player player) {

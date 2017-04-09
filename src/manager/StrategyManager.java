@@ -9,7 +9,6 @@ public class StrategyManager extends Manager {
 
     private static StrategyManager instance;
 
-    private boolean attackable = false;
     public static void init(Game game, Player player) {
         instance = new StrategyManager(game, player);
     }
@@ -21,9 +20,6 @@ public class StrategyManager extends Manager {
     }
 
 
-    public boolean isAttackable(){
-        return attackable;
-    }
     @Override
     public void processMessage(String message) {
 
@@ -36,9 +32,13 @@ public class StrategyManager extends Manager {
 
     @Override
     public void onFrame() {
-
+        if (self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Marine).count() >= 20){
+            ask(TacticsManager.getInstance(), "attacks");
+        }
     }
 
     public void initiateBO(){
+        ask(ProductionManager.getInstance(),"build 4 barracks");
+        ask(ProductionManager.getInstance(),"build 20 marines");
     }
 }
