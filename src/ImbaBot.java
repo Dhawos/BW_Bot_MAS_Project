@@ -3,7 +3,7 @@ import bwta.BWTA;
 import bwta.BaseLocation;
 import manager.*;
 
-public class TestBot1 extends DefaultBWListener {
+public class ImbaBot extends DefaultBWListener {
 
     private Mirror mirror = new Mirror();
 
@@ -41,7 +41,7 @@ public class TestBot1 extends DefaultBWListener {
         	}
         	System.out.println();
         }
-        game.setLocalSpeed(7);
+        game.setLocalSpeed(30);
         //Setting up and starting managers
         StrategyManager.init(game,self);
         TacticsManager.init(game,self);
@@ -98,6 +98,6 @@ public class TestBot1 extends DefaultBWListener {
     }
 
     public static void main(String[] args) {
-        new TestBot1().run();
+        new ImbaBot().run();
     }
 }
