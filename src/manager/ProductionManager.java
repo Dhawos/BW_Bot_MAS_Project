@@ -190,20 +190,4 @@ public class ProductionManager extends Manager {
             lockedGas -= unitType.gasPrice();
         }
     }
-
-
-    @Override
-    public void run() {
-        getCommandCenter();
-        while (true) {
-            if (self.supplyTotal() - self.supplyUsed() > 2) {
-                buildSCV();
-                if(self.minerals() > 150 && buildingsRatio.nbBarracksBuilt < buildingsRatio.nbBarracksGoal){
-                    buildBarrack();
-                }
-            } else if (self.minerals() >= 100) {
-                buildSupply();
-            }
-        }
-    }
 }

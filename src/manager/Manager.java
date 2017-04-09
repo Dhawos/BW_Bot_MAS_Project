@@ -6,7 +6,7 @@ import bwapi.Player;
 /**
  * Created by dhawo on 07/04/2017.
  */
-public abstract class Manager implements Runnable {
+public abstract class Manager {
     protected Game game;
     protected Player self;
 

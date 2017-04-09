@@ -83,10 +83,4 @@ public class IncomeManager extends Manager {
         sendIdleWorkersToWork();
     }
 
-    @Override
-    public void run() {
-        while(true){
-            sendIdleWorkersToWork();
-        }
-    }
 }

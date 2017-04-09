@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Thoma on 07/04/2017.
  */
-public abstract class UnitAgent {
+public class UnitAgent {
     private Unit unit;
     private Position lastPosition;
     private UnitJob job = UnitJob.IDLE;
@@ -17,8 +17,6 @@ public abstract class UnitAgent {
     public UnitAgent(Unit unit) {
         this.unit = unit;
     }
-
-    public abstract void findPath(Position target);
 
     public Unit getUnit() {
         return unit;

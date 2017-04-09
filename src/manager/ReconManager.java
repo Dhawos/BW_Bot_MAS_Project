@@ -1,6 +1,5 @@
 package manager;
 
-import agent.GroundAgent;
 import agent.UnitAgent;
 import agent.UnitJob;
 import bwapi.*;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 public class ReconManager extends Manager {
     private static ReconManager instance;
     private List<BaseLocation> bases;
-    private ArrayList<Pair<Integer,Unit>> enemyBuildings;
+    private ArrayList<Pair<Integer,Position>> enemyPositions;
     private int lastFrameScouting = -1;
     private UnitAgent scout;
 
@@ -33,47 +32,42 @@ public class ReconManager extends Manager {
     public static void init(Game game, Player player) {
         instance = new ReconManager(game, player);
         instance.bases = BWTA.getBaseLocations();
-        instance.enemyBuildings = new ArrayList<>();
+        instance.enemyPositions = new ArrayList<>();
     }
 
 
     private UnitAgent pickScoutingUnit() {
         ask(IncomeManager.getInstance(), "free scv");
         Unit scout = IncomeManager.getInstance().getFreeSCVs().get(IncomeManager.getInstance().getFreeSCVs().size() - 1);
-        return new GroundAgent(scout);
+        return new UnitAgent(scout);
     }
 
     public List<Position> getScoutingPosition() {
-        if (enemyBuildings.size() == 0) {
+        if (enemyPositions.size() == 0) {
             //retrieve starting locations' position
             return bases.stream().filter(b -> b.isStartLocation()
                     && !b.getPosition().equals(ProductionManager.getInstance().getCommandCenter().getPosition()))
                     .map(BaseLocation::getPosition).collect(Collectors.toList());
         }
         return new ArrayList<Position>() {{
-            enemyBuildings.stream().forEach(b -> add(b.second.getPosition()));
+            enemyPositions.stream().forEach(b -> add(b.second));
         }};
 
     }
 
     public Position getEnemyPositon() {
-        return enemyBuildings.stream().findAny().get().second.getPosition();
+        return enemyPositions.stream().findAny().get().second;
     }
 
     @Override
     public void processMessage(String message) {
 
     }
-
-    @Override
-    public void run() {
-    }
-
     @Override
     public void onFrame() {
         //go scouting every 5 minutes
         if (game.getFrameCount() - lastFrameScouting > 6000 || lastFrameScouting == -1) {
-            System.out.println("pick a scv to scout");
+            System.out.println("Pick a scv to scout");
             scout = pickScoutingUnit();
             scout.setJob(UnitJob.SCOUT);
             scout.act();
@@ -81,14 +75,15 @@ public class ReconManager extends Manager {
         } else if (scout != null && scout.isJobDone() && game.getFrameCount() - lastFrameScouting > 30) {
             IncomeManager.getInstance().getFreeSCVs().remove(scout.getUnit());
             scout = null;
-            System.out.println("scv finished scouting");
+            System.out.println("Scv finished scouting");
             IncomeManager.getInstance().sendIdleWorkersToWork();
         }
     }
 
     public void onUnitShow(Unit unit){
         if(!unit.getType().isNeutral() && unit.getType().isBuilding() && unit.getPlayer() != self){
-            enemyBuildings.add(new Pair<>(game.getFrameCount(), unit));
+            System.out.println("New enemy building discovered" + unit.getType().toString());
+            enemyPositions.add(new Pair<>(game.getFrameCount(), unit.getPosition()));
         }
     }
 }

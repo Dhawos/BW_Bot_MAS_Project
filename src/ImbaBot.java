@@ -41,23 +41,13 @@ public class ImbaBot extends DefaultBWListener {
         	}
         	System.out.println();
         }
-        game.setLocalSpeed(30);
+        game.setLocalSpeed(10);
         //Setting up and starting managers
         StrategyManager.init(game,self);
         TacticsManager.init(game,self);
         IncomeManager.init(game,self);
         ProductionManager.init(game,self);
         ReconManager.init(game, self);
-        Thread SMThread = new Thread(StrategyManager.getInstance());
-        //SMThread.start();
-        Thread IMThread = new Thread(IncomeManager.getInstance());
-        //IMThread.start();
-        Thread RMThread = new Thread(ReconManager.getInstance());
-        //RMThread.start();
-        Thread PMThread = new Thread(ProductionManager.getInstance());
-        //PMThread.start();
-        Thread TMThread = new Thread(TacticsManager.getInstance());
-        //TMThread.start();
     }
 
     @Override

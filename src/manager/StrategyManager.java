@@ -26,16 +26,12 @@ public class StrategyManager extends Manager {
     }
 
     @Override
-    public void run() {
-    }
-
-    @Override
     public void onFrame() {
         if(!isStrategySet){
             initiateBO();
             isStrategySet = true;
         }
-        if (self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Marine).count() >= 20){
+        if (self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Marine).count() >= 10){
             ask(TacticsManager.getInstance(), "attacks");
         }
     }

@@ -29,11 +29,6 @@ public class TacticsManager extends Manager {
         }
 
     }
-
-    @Override
-    public void run(){
-    }
-
     @Override
     public void onFrame() {
 
