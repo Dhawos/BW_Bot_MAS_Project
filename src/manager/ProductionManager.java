@@ -20,7 +20,7 @@ public class ProductionManager extends Manager {
         private int nbStartportBuilt = 0;
     }
     private ProductionBuildingsRatio buildingsRatio = new ProductionBuildingsRatio();
-    private int lockedMinerals = 0;
+    private int lockedMinerals = 400;
     private int lockedGas = 0;
     private LinkedList<UnitType> queue;
     private LinkedList<UnitType> inProductionQueue;
@@ -71,7 +71,6 @@ public class ProductionManager extends Manager {
                 inProductionQueue.add(UnitType.Terran_SCV);
             }
         }
-
     }
 
     public void buildSupply() {
@@ -161,7 +160,7 @@ public class ProductionManager extends Manager {
             instance.queue.addFirst(UnitType.Terran_SCV);
         }
         else if(self.supplyTotal() - self.supplyUsed() <= 2 && (!instance.queue.contains(UnitType.Terran_Supply_Depot) && !instance.inProductionQueue.contains(UnitType.Terran_Supply_Depot))){
-            instance.queue.add(UnitType.Terran_Supply_Depot);
+            instance.queue.addFirst(UnitType.Terran_Supply_Depot);
         }
         else if(buildingsRatio.nbBarracksBuilt + nbBarracksInProd + nbBarracksinQueue < buildingsRatio.nbBarracksGoal){
             instance.queue.add(UnitType.Terran_Barracks);
@@ -181,7 +180,7 @@ public class ProductionManager extends Manager {
 
     public void onUnitDiscover(Unit unit) {
         UnitType unitType = unit.getType();
-        if(self.getUnits().contains(unit) && unitType.isBuilding()){
+        if(unit.getPlayer() == self && unitType.isBuilding()){
             lockedMinerals -= unitType.mineralPrice();
             lockedGas -= unitType.gasPrice();
         }

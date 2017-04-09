@@ -86,6 +86,7 @@ public class TestBot1 extends DefaultBWListener {
     @Override
     public void onUnitDiscover(Unit unit) {
         super.onUnitDiscover(unit);
+        ProductionManager.getInstance().onUnitDiscover(unit);
 
     }
 
