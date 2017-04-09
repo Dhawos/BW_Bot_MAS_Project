@@ -173,7 +173,6 @@ public class ProductionManager extends Manager {
         UnitType type = unit.getType();
         if(type == UnitType.Terran_Barracks){
             buildingsRatio.nbBarracksBuilt++;
-            buildingsRatio.nbBarracksGoal++;
         }
         inProductionQueue.remove(type);
     }
