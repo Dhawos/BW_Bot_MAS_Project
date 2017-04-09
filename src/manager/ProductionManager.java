@@ -20,6 +20,8 @@ public class ProductionManager extends Manager {
         private int nbStartportBuilt = 0;
     }
     private ProductionBuildingsRatio buildingsRatio = new ProductionBuildingsRatio();
+    private int lockedMinerals = 0;
+    private int lockedGas = 0;
     private LinkedList<UnitType> queue;
     private LinkedList<UnitType> inProductionQueue;
     private Unit commandCenter = null;
@@ -42,7 +44,17 @@ public class ProductionManager extends Manager {
 
     @Override
     public void processMessage(String message) {
-
+        String[] args = message.split(" ");
+        if(args[0].equals("build")){
+            int count = Integer.parseInt(args[1]);
+            if(args[2].equals("barracks")){
+                buildingsRatio.nbBarracksGoal = count;
+            }else if(args[2].equals("marines")){
+                for(int i = 0; i < count;i++){
+                    inProductionQueue.add(UnitType.Terran_Marine);
+                }
+            }
+        }
     }
 
     public Unit getCommandCenter() {
@@ -54,7 +66,7 @@ public class ProductionManager extends Manager {
     }
 
     public void buildSCV() {
-        if (self.minerals() >= 50 && !commandCenter.isTraining()) {
+        if (!commandCenter.isTraining()) {
             if(commandCenter.train(UnitType.Terran_SCV)){
                 inProductionQueue.add(UnitType.Terran_SCV);
             }
@@ -95,6 +107,12 @@ public class ProductionManager extends Manager {
         }
     }
 
+    public void buildMarine() {
+        Unit Barracks = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Barracks).findAny().get();
+        Barracks.train(UnitType.Terran_Marine);
+        inProductionQueue.add(UnitType.Terran_Marine);
+    }
+
     public void build(UnitType type){
         if(type == UnitType.Terran_SCV){
             buildSCV();
@@ -102,12 +120,18 @@ public class ProductionManager extends Manager {
             buildSupply();
         }else if(type == UnitType.Terran_Barracks){
             buildBarrack();
+        }else if(type == UnitType.Terran_Marine){
+            buildMarine();
         }
     }
 
     public void startBuildingsInQueue(){
         UnitType unitType = queue.getFirst();
-        if(unitType.mineralPrice() <= self.minerals() && unitType.gasPrice() <= self.gas() && unitType.supplyRequired() <= (self.supplyTotal() - self.supplyUsed())){
+        if(unitType.mineralPrice() <= self.minerals()-lockedMinerals && unitType.gasPrice() <= self.gas()-lockedGas && unitType.supplyRequired() <= (self.supplyTotal() - self.supplyUsed())){
+            if(unitType.isBuilding()){
+                lockedMinerals += unitType.mineralPrice();
+                lockedGas += unitType.gasPrice();
+            }
             build(unitType);
             queue.remove(unitType);
         }
@@ -134,12 +158,12 @@ public class ProductionManager extends Manager {
         long nbBarracksInProd = inProductionQueue.stream().filter(u -> u == UnitType.Terran_Barracks).count();
         long nbBarracksinQueue = queue.stream().filter(u -> u == UnitType.Terran_Barracks).count();
         if(!commandCenter.isTraining() && (!instance.queue.contains(UnitType.Terran_SCV) && !instance.inProductionQueue.contains(UnitType.Terran_SCV))){
-            instance.queue.add(UnitType.Terran_SCV);
+            instance.queue.addFirst(UnitType.Terran_SCV);
         }
         else if(self.supplyTotal() - self.supplyUsed() <= 2 && (!instance.queue.contains(UnitType.Terran_Supply_Depot) && !instance.inProductionQueue.contains(UnitType.Terran_Supply_Depot))){
             instance.queue.add(UnitType.Terran_Supply_Depot);
         }
-        else if(self.minerals() > 150 && buildingsRatio.nbBarracksBuilt + nbBarracksInProd + nbBarracksinQueue < buildingsRatio.nbBarracksGoal){
+        else if(buildingsRatio.nbBarracksBuilt + nbBarracksInProd + nbBarracksinQueue < buildingsRatio.nbBarracksGoal){
             instance.queue.add(UnitType.Terran_Barracks);
         }
         startBuildingsInQueue();
@@ -154,6 +178,15 @@ public class ProductionManager extends Manager {
         }
         inProductionQueue.remove(type);
     }
+
+    public void onUnitDiscover(Unit unit) {
+        UnitType unitType = unit.getType();
+        if(self.getUnits().contains(unit) && unitType.isBuilding()){
+            lockedMinerals -= unitType.mineralPrice();
+            lockedGas -= unitType.gasPrice();
+        }
+    }
+
 
     @Override
     public void run() {

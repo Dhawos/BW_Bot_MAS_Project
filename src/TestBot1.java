@@ -83,6 +83,12 @@ public class TestBot1 extends DefaultBWListener {
         ProductionManager.getInstance().onUnitComplete(unit);
     }
 
+    @Override
+    public void onUnitDiscover(Unit unit) {
+        super.onUnitDiscover(unit);
+
+    }
+
     public static void main(String[] args) {
         new TestBot1().run();
     }
