@@ -8,7 +8,7 @@ import util.Utils;
 public class StrategyManager extends Manager {
 
     private static StrategyManager instance;
-
+    private boolean isStrategySet = false;
     public static void init(Game game, Player player) {
         instance = new StrategyManager(game, player);
     }
@@ -27,11 +27,14 @@ public class StrategyManager extends Manager {
 
     @Override
     public void run() {
-        initiateBO();
     }
 
     @Override
     public void onFrame() {
+        if(!isStrategySet){
+            initiateBO();
+            isStrategySet = true;
+        }
         if (self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Marine).count() >= 20){
             ask(TacticsManager.getInstance(), "attacks");
         }

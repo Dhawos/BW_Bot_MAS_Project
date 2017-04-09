@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 public class ProductionManager extends Manager {
     private static ProductionManager instance;
     private class ProductionBuildingsRatio{
-        private int nbBarracksGoal = 0;
+        private int nbBarracksGoal = 1;
         private int nbFactoriesGoal = 0;
         private int nbStartportGoal = 0;
         private int nbBarracksBuilt = 0;
