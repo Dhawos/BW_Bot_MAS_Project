@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 public class ProductionManager extends Manager {
     private static ProductionManager instance;
     private class ProductionBuildingsRatio{
-        private int nbBarracksGoal = 1;
+        private int nbBarracksGoal = 0;
         private int nbFactoriesGoal = 0;
         private int nbStartportGoal = 0;
         private int nbBarracksBuilt = 0;
@@ -51,7 +51,7 @@ public class ProductionManager extends Manager {
                 buildingsRatio.nbBarracksGoal = count;
             }else if(args[2].equals("marines")){
                 for(int i = 0; i < count;i++){
-                    inProductionQueue.add(UnitType.Terran_Marine);
+                    queue.add(UnitType.Terran_Marine);
                 }
             }
         }
@@ -107,9 +107,15 @@ public class ProductionManager extends Manager {
     }
 
     public void buildMarine() {
-        Unit Barracks = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Barracks).findAny().get();
-        Barracks.train(UnitType.Terran_Marine);
-        inProductionQueue.add(UnitType.Terran_Marine);
+        long nb_Barracks_Available = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Barracks && !u.isTraining() && u.isCompleted()).count();
+        //long nbBarracksInProd = inProductionQueue.stream().filter(u -> u == UnitType.Terran_Barracks).count();
+        if(nb_Barracks_Available >= 1){
+            Unit Barracks = self.getUnits().stream().filter(u -> u.getType() == UnitType.Terran_Barracks && !u.isTraining() && u.isCompleted()).findAny().get();
+            Barracks.train(UnitType.Terran_Marine);
+            inProductionQueue.add(UnitType.Terran_Marine);
+        }else{
+            queue.addLast(UnitType.Terran_Marine);
+        }
     }
 
     public void build(UnitType type){
